@@ -1,0 +1,13 @@
+# Painel (Streamlit Community Cloud)
+streamlit>=1.50
+pandas>=2.0
+plotly>=6.0
+streamlit-agraph>=0.0.45
+pillow>=10.0
+cryptography>=42.0
+
+# Importador (coordenadas opcionais com --geocode)
+requests>=2.31
+
+# Testes
+pytest>=8.0

@@ -1,0 +1,26 @@
+# ⚠️ REPOSITÓRIO PÚBLICO: dados reais legíveis NUNCA vão para o GitHub.
+# Só data/family_tree.enc (criptografado) e data/sample/ (fictício) são versionados.
+data/family_tree.json
+data/places_cache.json
+data/photos/*
+!data/photos/.gitkeep
+*.rmtree
+*.ged
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Segredos
+.env
+.streamlit/secrets.toml
+
+# Temporários
+*.tmp
+
+# Sistema
+.DS_Store
+Thumbs.db
