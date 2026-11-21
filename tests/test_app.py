@@ -83,3 +83,23 @@ def test_encrypted_tree_requires_password(tmp_path, monkeypatch):
     assert at.session_state.selected == "DM00-001"     # árvore aberta
     # foto vem de dentro do pacote criptografado (não há arquivos em pub/photos)
     assert not (tmp_path / "pub" / "photos").exists()
+
+
+def test_old_lineage_names_are_accepted(tmp_path, monkeypatch):
+    """Árvores de versões antigas usavam outros nomes de linhagem (ex.: o primeiro nome)."""
+    import json
+    import shutil
+
+    shutil.copytree(Path(APP).parent / "data" / "sample", tmp_path / "d")
+    f = tmp_path / "d" / "family_tree.json"
+    tree = json.loads(f.read_text(encoding="utf-8"))
+    old = {"titular": "rafael", "conjuge": "beatriz"}
+    for p in tree["persons"].values():
+        p["lineage"] = [old.get(x, x) for x in p["lineage"]]
+    f.write_text(json.dumps(tree), encoding="utf-8")
+    monkeypatch.setenv("ARVORE_DATA_DIR", str(tmp_path / "d"))
+    monkeypatch.setenv("ARVORE_DEMO", "0")
+    at = run()
+    at.toggle[0].set_value(True).run()
+    at.radio[0].set_value("conjuge").run()
+    assert not at.exception

@@ -114,6 +114,16 @@ def load_tree(path: str, mtime: float, key: str = "") -> dict:
         tree, photos = json.loads(Path(path).read_text(encoding="utf-8")), {}
     tree["_photos"] = photos
     persons = tree["persons"]
+    # Compatibilidade: árvores geradas por versões antigas do importador usavam outros nomes
+    # para as linhagens. Renomeia a linhagem do titular e a do cônjuge para os nomes atuais.
+    rename = {}
+    for pid, new in ((tree["meta"].get("root_id"), "titular"), (tree["meta"].get("spouse_id"), "conjuge")):
+        lin = (persons.get(pid) or {}).get("lineage") or []
+        if len(lin) == 1 and lin[0] != new:
+            rename[lin[0]] = new
+    if rename:
+        for p in persons.values():
+            p["lineage"] = sorted({rename.get(x, x) for x in p.get("lineage") or []})
     # índice de casais (fatos de casamento/divórcio)
     couples = {}
     for c in (tree.get("relationships") or {}).get("couples") or []:
@@ -468,7 +478,7 @@ def build_graph(pos: dict):
     for pid, (x, y) in pos.items():
         p = P[pid]
         role = p.get("role")
-        color = GREY if role in ("collateral", "stub") else LINEAGE_COLORS[lineage_key(p)]
+        color = GREY if role in ("collateral", "stub") else LINEAGE_COLORS.get(lineage_key(p), NAVY)
         parts = (p.get("name") or pid).split()
         short = " ".join(parts[:1] + parts[-1:]) if len(parts) > 2 else " ".join(parts)
         is_sel = pid == sel
